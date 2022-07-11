@@ -4,9 +4,9 @@ import tkinter.messagebox as msgbox
 from tkinter import filedialog
 
 from selenium import webdriver
-# from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
-# from webdriver_manager.chrome import ChromeDriverManager
+from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.keys import Keys
 
 import pyperclip
@@ -140,8 +140,9 @@ def open_driver():
     options = Options()
     # options.add_argument('headless')
     options.add_experimental_option('excludeSwitches', ['enable-logging']) # 불필요한 로그를 프린트하지 않음.
-    # driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
-    driver = webdriver.Chrome('.\\chromedriver.exe', options=options)
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+    driver.minimize_window()
+    # driver = webdriver.Chrome('.\\chromedriver.exe', options=options)
     driver.implicitly_wait(10) # 요청한 페이지의 정보가 모두 넘어올 때까지 최대 10초 기다림. drive를 열고 한 번만 정의하면 됨.
     
     return driver
@@ -152,7 +153,7 @@ def check_access_token(client_id, client_secret, user_id, user_password):
     """엑세스 토큰 받아오기"""
     
     redirect_uri = 'https://localhost:8888/'
-    url = f'https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id={client_id}&redirect_uri={redirect_uri}&state=REWERWERTATE'
+    url = f'https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id={client_id}&redirect_uri=https://localhost:8888/&state=REWERWERTATE'
     
     driver = open_driver()
     driver.get(url)
@@ -176,13 +177,13 @@ def check_access_token(client_id, client_secret, user_id, user_password):
     driver.find_element('id', value='log.login').click()
     
     url = driver.current_url
-    print(url)
     code = url.split('code=')[1].split('&')[0]
     
     url = f'https://nid.naver.com/oauth2.0/token?grant_type=authorization_code&client_id={client_id}&client_secret={client_secret}&redirect_uri=https://localhost:8888/&code={code}&state=REWERWERTATE'
     driver.get(url)
     res = driver.page_source
     access_token = res.split('"access_token":"')[1].split('",')[0]
+    driver.quit()
     
     return access_token
 
@@ -256,3 +257,9 @@ start_btn = Button(posting, text='시작', width=10, height=3, command=naver_caf
 start_btn.pack(side='right', padx=5, pady=5)
 
 root.mainloop()
+
+# https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id={client_id}&redirect_uri=https://localhost:8888/&state=REWERWERTATE
+
+# https://nid.naver.com/oauth2.0/token?grant_type=authorization_code&client_id={client_id}&client_secret={client_secret}&redirect_uri=https://localhost:8888/&code={code}&state=REWERWERTATE
+
+# 30761183
